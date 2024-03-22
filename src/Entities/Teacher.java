@@ -1,3 +1,5 @@
+package Entities;
+
 import java.util.UUID;
 
 public class Teacher {
@@ -25,7 +27,7 @@ public class Teacher {
 
     @Override
     public String toString() {
-        return "Teacher{" +
+        return "Entities.Teacher{" +
                 "id=" + id +
                 ", name='" + name + '\'' +
                 '}';

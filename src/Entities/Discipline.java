@@ -1,6 +1,9 @@
-public class Discipline {
-    private String name;
+package Entities;
 
+public class Discipline {
+
+    private Teacher teacher;
+    private String name;
     private Integer semester;
 
     public Discipline() {
@@ -9,6 +12,20 @@ public class Discipline {
     public Discipline(String name, Integer semester) {
         this.name = name;
         this.semester = semester;
+    }
+
+    public Discipline(Teacher teacher, String name, Integer semester) {
+        this.teacher = teacher;
+        this.name = name;
+        this.semester = semester;
+    }
+
+    public Teacher getTeacher() {
+        return teacher;
+    }
+
+    public void setTeacher(Teacher teacher) {
+        this.teacher = teacher;
     }
 
     public String getName() {
@@ -30,7 +47,8 @@ public class Discipline {
     @Override
     public String toString() {
         return "Discipline{" +
-                "name='" + name + '\'' +
+                "teacher=" + teacher +
+                ", name='" + name + '\'' +
                 ", semester=" + semester +
                 '}';
     }

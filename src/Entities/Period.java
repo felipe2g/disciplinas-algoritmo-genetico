@@ -1,16 +1,22 @@
+package Entities;
+
 import java.util.ArrayList;
 
-public class Semester {
+public class Period {
     private Integer order;
 
     private ArrayList<Schedule> schedules = new ArrayList<>();
 
     // Colocar as disciplinas do semestre aqui dentro
 
-    public Semester() {
+    public Period() {
     }
 
-    public Semester(Integer order, ArrayList<Schedule> schedules) {
+    public Period(Integer order) {
+        this.order = order;
+    }
+
+    public Period(Integer order, ArrayList<Schedule> schedules) {
         this.order = order;
         this.schedules = schedules;
     }
@@ -37,7 +43,7 @@ public class Semester {
 
     @Override
     public String toString() {
-        return "Semester{" +
+        return "Entities.Semester{" +
                 "order=" + order +
                 ", schedules=" + schedules +
                 '}';

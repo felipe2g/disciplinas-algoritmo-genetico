@@ -1,5 +1,8 @@
 package Common;
 
+import java.util.ArrayList;
+import java.util.EnumSet;
+
 public enum WeekDate {
     MONDAY("Segunda-feira", 1),
     TUESDAY("Terça-feira", 2),
@@ -20,5 +23,9 @@ public enum WeekDate {
     }
     public Integer getValue() {
         return value;
+    }
+
+    public static ArrayList<WeekDate> getList() {
+        return new ArrayList<WeekDate>(EnumSet.allOf(WeekDate.class));
     }
 }
