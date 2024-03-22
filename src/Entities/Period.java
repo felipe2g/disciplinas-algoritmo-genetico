@@ -4,7 +4,6 @@ import java.util.ArrayList;
 
 public class Period {
     private Integer order;
-
     private ArrayList<Schedule> schedules = new ArrayList<>();
 
     // Colocar as disciplinas do semestre aqui dentro

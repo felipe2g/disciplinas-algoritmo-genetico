@@ -12,8 +12,7 @@ import java.util.stream.Collectors;
 public class Main {
     private static final Integer PERIOD_COUNT = 5;
     private static final Integer DISCIPLINES_PER_DAY = 2;
-
-    private static final Boolean DONT_REPEAT_DISCIPLINE_IN_DAY = true;
+    private static final Boolean SAME_DISCIPLINE_IN_DAY = false;
 
     public static void main(String[] args) {
         ArrayList<Teacher> teachers = TeacherInitializer.initializeTeachers();
@@ -63,30 +62,29 @@ public class Main {
                 ArrayList<Discipline> dayDisciplines = new ArrayList<>();
 
 
-                while(dayDisciplines.size() < DISCIPLINES_PER_DAY) {
+                while (dayDisciplines.size() < DISCIPLINES_PER_DAY) {
                     int rnd = new Random().nextInt(actualSemesterDisciplines.size());
+                    Discipline randomDiscipline = actualSemesterDisciplines.get(rnd);
 
-                    if (DONT_REPEAT_DISCIPLINE_IN_DAY && !dayDisciplines.isEmpty()) {
+                    if (!SAME_DISCIPLINE_IN_DAY && !dayDisciplines.isEmpty()) {
                         String nameSelectedDiscipline = dayDisciplines.get(0).getName();
-                        String nameRandomDiscipline = actualSemesterDisciplines.get(rnd).getName();
-                        boolean selectedDisciplineHasSameNameOfRandomDiscipline = nameSelectedDiscipline.equals(nameRandomDiscipline);
+                        String nameRandomDiscipline = randomDiscipline.getName();
 
-                        while(selectedDisciplineHasSameNameOfRandomDiscipline) {
+                        while (nameSelectedDiscipline.equals(nameRandomDiscipline)) {
                             rnd = new Random().nextInt(actualSemesterDisciplines.size());
-
-                            selectedDisciplineHasSameNameOfRandomDiscipline = nameSelectedDiscipline.equals(actualSemesterDisciplines.get(rnd).getName());
+                            randomDiscipline = actualSemesterDisciplines.get(rnd);
+                            nameRandomDiscipline = randomDiscipline.getName();
                         }
                     }
 
-                    Discipline randomDiscipline = actualSemesterDisciplines.get(rnd);
-
-                    usageDisciplines.put(randomDiscipline.getName(), usageDisciplines.get(randomDiscipline.getName()) + 1);
+                    usageDisciplines.put(randomDiscipline.getName(), usageDisciplines.getOrDefault(randomDiscipline.getName(), 0) + 1);
                     int disciplineUsageCount = usageDisciplines.get(randomDiscipline.getName());
 
-                    if(Objects.equals(disciplineUsageCount, DISCIPLINES_PER_DAY)) {
+                    if (Objects.equals(disciplineUsageCount, DISCIPLINES_PER_DAY)) {
                         actualSemesterDisciplines.remove(rnd);
                         usageDisciplines.remove(randomDiscipline.getName());
                     }
+
                     dayDisciplines.add(randomDiscipline);
                 }
 
