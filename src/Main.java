@@ -1,4 +1,5 @@
 import Common.Initializers.DisciplineInitializer;
+import Common.Initializers.FullCourse;
 import Common.Initializers.TeacherInitializer;
 import Common.WeekDate;
 import Entities.Discipline;
@@ -21,7 +22,7 @@ public class Main {
         ArrayList<ArrayList<Period>> population = new ArrayList<>();
 
         for(int i = 0; i < 99; i++) {
-            population.add(generateRandomFullCourse(PERIOD_COUNT, teachers, disciplines));
+            population.add(FullCourse.generateRandomFullCourse(teachers, disciplines));
         }
 
         for (int j=0; j<population.size(); j++) {
@@ -42,87 +43,4 @@ public class Main {
             }
         }
     }
-
-    public static ArrayList<Period> generateRandomFullCourse(int PERIOD_COUNT,
-                                                        ArrayList<Teacher> teachers,
-                                                        ArrayList<Discipline> disciplines) {
-
-        ArrayList<Period> fullCourse = new ArrayList<>();
-
-        ArrayList<Discipline> disciplinesWithTeacher = generateDisciplinesWithTeacher(disciplines, teachers);
-
-        for(int periodOrder = 1; periodOrder <= PERIOD_COUNT; periodOrder++) {
-            Period period = new Period(periodOrder);
-
-            ArrayList<Discipline> actualSemesterDisciplines = getDisciplinesOnSemester(disciplinesWithTeacher, periodOrder);
-            HashMap<String, Integer> usageDisciplines = generateListWithUsageCount(actualSemesterDisciplines);
-
-            for(int dayNumber = 0; dayNumber < WeekDate.getList().size(); dayNumber++) {
-                WeekDate weekDate = WeekDate.getList().get(dayNumber);
-                ArrayList<Discipline> dayDisciplines = new ArrayList<>();
-
-
-                while (dayDisciplines.size() < DISCIPLINES_PER_DAY) {
-                    int rnd = new Random().nextInt(actualSemesterDisciplines.size());
-                    Discipline randomDiscipline = actualSemesterDisciplines.get(rnd);
-
-                    if (!SAME_DISCIPLINE_IN_DAY && !dayDisciplines.isEmpty()) {
-                        String nameSelectedDiscipline = dayDisciplines.get(0).getName();
-                        String nameRandomDiscipline = randomDiscipline.getName();
-
-                        while (nameSelectedDiscipline.equals(nameRandomDiscipline)) {
-                            rnd = new Random().nextInt(actualSemesterDisciplines.size());
-                            randomDiscipline = actualSemesterDisciplines.get(rnd);
-                            nameRandomDiscipline = randomDiscipline.getName();
-                        }
-                    }
-
-                    usageDisciplines.put(randomDiscipline.getName(), usageDisciplines.getOrDefault(randomDiscipline.getName(), 0) + 1);
-                    int disciplineUsageCount = usageDisciplines.get(randomDiscipline.getName());
-
-                    if (Objects.equals(disciplineUsageCount, DISCIPLINES_PER_DAY)) {
-                        actualSemesterDisciplines.remove(rnd);
-                        usageDisciplines.remove(randomDiscipline.getName());
-                    }
-
-                    dayDisciplines.add(randomDiscipline);
-                }
-
-                Schedule schedule = new Schedule(dayDisciplines, weekDate);
-                period.addSchedule(schedule);
-            }
-
-            fullCourse.add(period);
-        }
-
-        return fullCourse;
-    }
-
-    public static ArrayList<Discipline> generateDisciplinesWithTeacher(ArrayList<Discipline> disciplines,
-                                                                       ArrayList<Teacher> teachers) {
-        ArrayList<Discipline> disciplinesWithTeacher = new ArrayList<>();
-
-        for(int i = 0; i < disciplines.size(); i++) {
-            Discipline newDiscipline = disciplines.get(i);
-            int relativePositionDisciplineForTeacher = i % teachers.size();
-            newDiscipline.setTeacher(teachers.get(relativePositionDisciplineForTeacher));
-            disciplinesWithTeacher.add(newDiscipline);
-        }
-
-        return disciplinesWithTeacher;
-    }
-
-    public static HashMap<String, Integer> generateListWithUsageCount(ArrayList<Discipline> disciplines) {
-        return disciplines.stream()
-                .collect(Collectors.toMap(Discipline::getName, d -> 0, (a, b) -> b, HashMap::new));
-    }
-
-    public static ArrayList<Discipline> getDisciplinesOnSemester(ArrayList<Discipline> disciplines, Integer semester) {
-
-        return disciplines.stream()
-                .filter(discipline -> discipline.getSemester()
-                .equals(semester))
-                .collect(Collectors.toCollection(ArrayList::new));
-    }
-
 }
