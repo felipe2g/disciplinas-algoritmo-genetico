@@ -1,27 +1,23 @@
+import Common.GlobalVariables;
 import Common.Initializers.DisciplineInitializer;
 import Common.Initializers.FullCourse;
 import Common.Initializers.TeacherInitializer;
-import Common.WeekDate;
 import Entities.Discipline;
 import Entities.Period;
 import Entities.Schedule;
 import Entities.Teacher;
 
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.ArrayList;
+
 
 public class Main {
-    private static final Integer PERIOD_COUNT = 5;
-    private static final Integer DISCIPLINES_PER_DAY = 2;
-    private static final Boolean SAME_DISCIPLINE_IN_DAY = false;
-
     public static void main(String[] args) {
         ArrayList<Teacher> teachers = TeacherInitializer.initializeTeachers();
         ArrayList<Discipline> disciplines = DisciplineInitializer.initializeDisciplines();
 
         ArrayList<ArrayList<Period>> population = new ArrayList<>();
 
-        for(int i = 0; i < 99; i++) {
+        for(int i = 1; i < GlobalVariables.POPULATION_SIZE; i++) {
             population.add(FullCourse.generateRandomFullCourse(teachers, disciplines));
         }
 
