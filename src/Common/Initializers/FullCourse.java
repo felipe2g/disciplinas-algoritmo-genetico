@@ -31,15 +31,16 @@ public class FullCourse {
                 ArrayList<Discipline> dayDisciplines = new ArrayList<>();
 
                 while (dayDisciplines.size() < GlobalVariables.DISCIPLINES_PER_DAY) {
-                    int rnd = new Random().nextInt(actualSemesterDisciplines.size());
+                    Random random = new Random();
+                    int rnd = random.nextInt(actualSemesterDisciplines.size());
                     Discipline randomDiscipline = actualSemesterDisciplines.get(rnd);
 
-                    if (!GlobalVariables.SAME_DISCIPLINE_IN_DAY && !dayDisciplines.isEmpty()) {
+                    if (!GlobalVariables.HAS_SAME_DISCIPLINE_IN_DAY && !dayDisciplines.isEmpty()) {
                         String nameSelectedDiscipline = dayDisciplines.get(0).getName();
                         String nameRandomDiscipline = randomDiscipline.getName();
 
-                        while (nameSelectedDiscipline.equals(nameRandomDiscipline)) {
-                            rnd = new Random().nextInt(actualSemesterDisciplines.size());
+                        while (nameSelectedDiscipline.equals(nameRandomDiscipline) && usageDisciplines.size() > 1) {
+                            rnd = random.nextInt(actualSemesterDisciplines.size());
                             randomDiscipline = actualSemesterDisciplines.get(rnd);
                             nameRandomDiscipline = randomDiscipline.getName();
                         }
