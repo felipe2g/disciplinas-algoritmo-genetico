@@ -35,17 +35,6 @@ public class FullCourse {
                     int rnd = random.nextInt(actualSemesterDisciplines.size());
                     Discipline randomDiscipline = actualSemesterDisciplines.get(rnd);
 
-                    if (!GlobalVariables.HAS_SAME_DISCIPLINE_IN_DAY && !dayDisciplines.isEmpty()) {
-                        String nameSelectedDiscipline = dayDisciplines.get(0).getName();
-                        String nameRandomDiscipline = randomDiscipline.getName();
-
-                        while (nameSelectedDiscipline.equals(nameRandomDiscipline) && usageDisciplines.size() > 1) {
-                            rnd = random.nextInt(actualSemesterDisciplines.size());
-                            randomDiscipline = actualSemesterDisciplines.get(rnd);
-                            nameRandomDiscipline = randomDiscipline.getName();
-                        }
-                    }
-
                     usageDisciplines.put(randomDiscipline.getName(), usageDisciplines.getOrDefault(randomDiscipline.getName(), 0) + 1);
                     int disciplineUsageCount = usageDisciplines.get(randomDiscipline.getName());
 
