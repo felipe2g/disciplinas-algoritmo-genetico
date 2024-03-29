@@ -41,21 +41,29 @@ public class Main {
             for(Individual individual: population) {
                 Double rate = 0.0;
 
-                for (int i = 0; i < GlobalVariables.PERIOD_COUNT; i++) {
-                    ArrayList<UUID> teacherIds = new ArrayList<>();
+                for (int disciplineSequence = 0; disciplineSequence < GlobalVariables.DISCIPLINES_PER_DAY; disciplineSequence++) {
+                    ArrayList<UUID> teachersInSameWeekDate = new ArrayList<>(TeacherInitializer.initializeTeachers().size());
                     for (int dayNumber = 0; dayNumber < WeekDate.getList().size(); dayNumber++) {
-                        for (int j = 0; j < GlobalVariables.DISCIPLINES_PER_DAY; j++) {
-                            teacherIds.add(individual.getCourse().get(i).getSchedules().get(dayNumber).getDisciplines().get(j).getTeacher().getId());
+                        for (int periodNumber = 0; periodNumber < GlobalVariables.PERIOD_COUNT; periodNumber++) {
+                            Period period = individual.getCourse().get(periodNumber);
+                            Schedule schedule = period.getSchedules().get(dayNumber);
+                            Discipline discipline = schedule.getDisciplines().get(disciplineSequence);
+                            UUID teacherUUID = discipline.getTeacher().getId();
+
+                            System.out.print(discipline.getTeacher().getName() + " | ");
+
+
+                            Boolean teacherIdHasInArray = teachersInSameWeekDate.contains(teacherUUID);
+                            if(!teacherIdHasInArray) {
+                                teachersInSameWeekDate.add(teacherUUID);
+                                break;
+                            }
+                            rate++;
                         }
                     }
                 }
 
-
-
-                // Verificar choques de horários
-                // >> individual > course > schedules > 0 > disciplines > primeira posicao > joga no array
-                // >> individual > course > schedules > 0 > disciplines > segunda posicao > joga no array
-                System.out.println(individual.getCourse().get(0));
+                individual.setRate(rate);
             }
+        }
     }
-}
