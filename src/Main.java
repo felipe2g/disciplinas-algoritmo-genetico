@@ -9,13 +9,17 @@ import Entities.Period;
 import Entities.Schedule;
 import Entities.Teacher;
 
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 
 public class Main {
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException {
         GlobalVariables.START_TIME = System.nanoTime();
 
         ArrayList<Teacher> teachers = TeacherInitializer.initializeTeachers();
@@ -23,8 +27,58 @@ public class Main {
 
         ArrayList<Individual> population = initialization();
 
-        fitness(population);
+        FileWriter arq = new FileWriter("horarios.html");
+        PrintWriter gravarArq = new PrintWriter(arq);
 
+        for (int individualIndex = 0; individualIndex < population.size(); individualIndex++) {
+            gravarArq.printf("+-- Indivíduo " + individualIndex + " --+%n");
+            Individual individual = population.get(individualIndex);
+            ArrayList<Period> course = individual.getCourse();
+
+            HashMap<WeekDate, ArrayList<Schedule>> hashMap = generateHashMap();
+
+            for (int courseIndex = 0; courseIndex < course.size(); courseIndex++) {
+                ArrayList<Schedule> schedules = course.get(courseIndex).getSchedules();
+                for (int schedulesIndex = 0; schedulesIndex < schedules.size(); schedulesIndex++) {
+                    Schedule schedule = schedules.get(schedulesIndex);
+                    ArrayList<Schedule> scheduleListWithInsert = hashMap.get(schedule.getWeekDate());
+
+                    scheduleListWithInsert.add(schedule);
+
+                    hashMap.put(schedule.getWeekDate(), scheduleListWithInsert);
+                }
+            }
+
+            for(WeekDate weekDate: WeekDate.getList()) {
+                gravarArq.printf("+-- " + weekDate.getKey() + " --+%n");
+                ArrayList<Schedule> schedulesInDay = hashMap.get(weekDate);
+
+                for (int disciplineIndex = 0; disciplineIndex < GlobalVariables.DISCIPLINES_PER_DAY; disciplineIndex++) {
+                    for(Schedule schedule: schedulesInDay) {
+                        gravarArq.printf(" " + schedule.getDisciplines().get(disciplineIndex).getName() + " | ");
+                    }
+                    gravarArq.printf("%n");
+                    for(Schedule schedule: schedulesInDay) {
+                        gravarArq.printf(" " + schedule.getDisciplines().get(disciplineIndex).getTeacher().getName() + " | ");
+                    }
+                    gravarArq.printf("%n");
+                }
+            }
+        }
+
+        arq.close();
+        //fitness(population);
+
+    }
+
+    public static HashMap<WeekDate, ArrayList<Schedule>> generateHashMap() {
+        HashMap<WeekDate, ArrayList<Schedule>> hashMap = new HashMap<>(WeekDate.getList().size());
+
+        for (WeekDate day : WeekDate.values()) {
+            hashMap.put(day, new ArrayList<>());
+        }
+
+        return hashMap;
     }
 
     public static ArrayList<Individual> initialization() {
