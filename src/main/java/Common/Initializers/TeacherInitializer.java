@@ -8,18 +8,18 @@ import java.util.UUID;
 
 public class TeacherInitializer {
     public static ArrayList<Teacher> initializeTeachers() {
-        Teacher teacher1 = new Teacher("Professor 1");
-        Teacher teacher2 = new Teacher("Professor 2");
-        Teacher teacher3 = new Teacher("Professor 3");
-        Teacher teacher4 = new Teacher("Professor 4");
-        Teacher teacher5 = new Teacher("Professor 5");
-        Teacher teacher6 = new Teacher("Professor 6");
-        Teacher teacher7 = new Teacher("Professor 7");
-        Teacher teacher8 = new Teacher("Professor 8");
-        Teacher teacher9 = new Teacher("Professor 9");
-        Teacher teacher10 = new Teacher("Professor 10");
-        Teacher teacher11 = new Teacher("Professor 11");
-        Teacher teacher12 = new Teacher("Professor 12");
+        Teacher teacher1 = new Teacher("Clarimundo Machado");
+        Teacher teacher2 = new Teacher("Edson Angoti");
+        Teacher teacher3 = new Teacher("Carlos Magno");
+        Teacher teacher4 = new Teacher("Crícia Zilda");
+        Teacher teacher5 = new Teacher("Wilton Filho");
+        Teacher teacher6 = new Teacher("Camilo Barreto");
+        Teacher teacher7 = new Teacher("Ricardo Boaventura");
+        Teacher teacher8 = new Teacher("Rodrigo Cavanha");
+        Teacher teacher9 = new Teacher("Bruno Queiroz");
+        Teacher teacher10 = new Teacher("Travis Scott");
+        Teacher teacher11 = new Teacher("Dave Mustaine");
+        Teacher teacher12 = new Teacher("Chuck Schuldiner");
 
         ArrayList<Teacher> teachers = new ArrayList<>();
         teachers.add(teacher1);

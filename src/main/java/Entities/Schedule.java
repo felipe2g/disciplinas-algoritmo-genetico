@@ -7,13 +7,15 @@ import java.util.ArrayList;
 public class Schedule {
     private ArrayList<Discipline> disciplines;
     private WeekDate weekDate;
+    private Integer order;
 
     public Schedule() {
     }
 
-    public Schedule(ArrayList<Discipline> disciplines, WeekDate weekDate) {
+    public Schedule(ArrayList<Discipline> disciplines, WeekDate weekDate, Integer order) {
         this.disciplines = disciplines;
         this.weekDate = weekDate;
+        this.order = order;
     }
 
     public ArrayList<Discipline> getDisciplines() {
@@ -43,11 +45,20 @@ public class Schedule {
         this.weekDate = weekDate;
     }
 
+    public Integer getOrder() {
+        return order;
+    }
+
+    public void setOrder(Integer order) {
+        this.order = order;
+    }
+
     @Override
     public String toString() {
         return "Schedule{" +
-                ", discipline=" + disciplines.toString() +
+                "disciplines=" + disciplines +
                 ", weekDate=" + weekDate +
+                ", order=" + order +
                 '}';
     }
 }

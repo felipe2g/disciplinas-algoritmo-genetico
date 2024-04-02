@@ -14,6 +14,43 @@ import java.util.Random;
 import java.util.stream.Collectors;
 
 public class FullCourse {
+
+    public static ArrayList<Schedule> generateRandomFullCourseLine(ArrayList<Teacher> teachers, ArrayList<Discipline> disciplines) {
+        ArrayList<Schedule> schedules = new ArrayList<>(disciplines.size());
+
+        ArrayList<Discipline> disciplinesWithTeacher = generateDisciplinesWithTeacher(disciplines, teachers);
+
+        for (int periodOrder = 1; periodOrder <= GlobalVariables.PERIOD_COUNT; periodOrder++) {
+            ArrayList<Discipline> actualSemesterDisciplines = getDisciplinesOnSemester(disciplinesWithTeacher, periodOrder);
+            HashMap<String, Integer> usageDisciplines = generateListWithUsageCount(actualSemesterDisciplines);
+
+            for (int dayNumber = 0; dayNumber < WeekDate.getList().size(); dayNumber++) {
+                WeekDate weekDate = WeekDate.getList().get(dayNumber);
+                ArrayList<Discipline> dayDisciplines = new ArrayList<>();
+
+                while (dayDisciplines.size() < GlobalVariables.DISCIPLINES_PER_DAY) {
+                    Random random = new Random();
+                    int rnd = random.nextInt(actualSemesterDisciplines.size());
+                    Discipline randomDiscipline = actualSemesterDisciplines.get(rnd);
+
+                    usageDisciplines.put(randomDiscipline.getName(), usageDisciplines.getOrDefault(randomDiscipline.getName(), 0) + 1);
+                    int disciplineUsageCount = usageDisciplines.get(randomDiscipline.getName());
+
+                    if (Objects.equals(disciplineUsageCount, GlobalVariables.DISCIPLINES_PER_DAY)) {
+                        actualSemesterDisciplines.remove(rnd);
+                        usageDisciplines.remove(randomDiscipline.getName());
+                    }
+
+                    dayDisciplines.add(randomDiscipline);
+                }
+
+                Schedule schedule = new Schedule(dayDisciplines, weekDate, periodOrder);
+                schedules.add(schedule);
+            }
+        }
+
+        return schedules;
+    }
     public static ArrayList<Period> generateRandomFullCourse(ArrayList<Teacher> teachers, ArrayList<Discipline> disciplines) {
 
         ArrayList<Period> fullCourse = new ArrayList<>();
@@ -46,8 +83,8 @@ public class FullCourse {
                     dayDisciplines.add(randomDiscipline);
                 }
 
-                Schedule schedule = new Schedule(dayDisciplines, weekDate);
-                period.addSchedule(schedule);
+//                Schedule schedule = new Schedule(dayDisciplines, weekDate);
+//                period.addSchedule(schedule);
             }
 
             fullCourse.add(period);

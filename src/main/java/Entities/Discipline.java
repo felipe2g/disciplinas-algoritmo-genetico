@@ -5,6 +5,7 @@ public class Discipline {
     private Teacher teacher;
     private String name;
     private Integer semester;
+    private Boolean scheduleConflict = false;
 
     public Discipline() {
     }
@@ -44,12 +45,21 @@ public class Discipline {
         this.semester = semester;
     }
 
+    public Boolean getScheduleConflict() {
+        return scheduleConflict;
+    }
+
+    public void setScheduleConflict(Boolean scheduleConflict) {
+        this.scheduleConflict = scheduleConflict;
+    }
+
     @Override
     public String toString() {
         return "Discipline{" +
                 "teacher=" + teacher +
                 ", name='" + name + '\'' +
                 ", semester=" + semester +
+                ", scheduleConflict=" + scheduleConflict +
                 '}';
     }
 }

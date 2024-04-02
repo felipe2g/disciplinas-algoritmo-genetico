@@ -7,7 +7,7 @@ import Common.Initializers.TeacherInitializer;
 import java.util.ArrayList;
 
 public class Individual {
-    private ArrayList<Period> course = new ArrayList<Period>();
+    private ArrayList<Schedule> course = new ArrayList<Schedule>();
 
     private Double rate = 0.0;
 
@@ -15,19 +15,19 @@ public class Individual {
         ArrayList<Teacher> teachers = TeacherInitializer.initializeTeachers();
         ArrayList<Discipline> disciplines = DisciplineInitializer.initializeDisciplines();
 
-        this.course = FullCourse.generateRandomFullCourse(teachers, disciplines);
+        this.course = FullCourse.generateRandomFullCourseLine(teachers, disciplines);
     }
 
-    public Individual(ArrayList<Period> course, Double rate) {
+    public Individual(ArrayList<Schedule> course, Double rate) {
         this.course = course;
         this.rate = rate;
     }
 
-    public ArrayList<Period> getCourse() {
+    public ArrayList<Schedule> getCourse() {
         return course;
     }
 
-    public void setCourse(ArrayList<Period> course) {
+    public void setCourse(ArrayList<Schedule> course) {
         this.course = course;
     }
 
