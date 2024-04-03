@@ -1,10 +1,7 @@
 package Export;
 
-import Common.GlobalVariables;
 import Common.WeekDate;
 import Entities.Individual;
-import Entities.Period;
-import Entities.Schedule;
 
 import java.io.FileWriter;
 import java.io.IOException;

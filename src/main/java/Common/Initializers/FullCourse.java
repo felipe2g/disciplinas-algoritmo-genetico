@@ -3,7 +3,6 @@ package Common.Initializers;
 import Common.GlobalVariables;
 import Common.WeekDate;
 import Entities.Discipline;
-import Entities.Period;
 import Entities.Schedule;
 import Entities.Teacher;
 
@@ -50,47 +49,6 @@ public class FullCourse {
         }
 
         return schedules;
-    }
-    public static ArrayList<Period> generateRandomFullCourse(ArrayList<Teacher> teachers, ArrayList<Discipline> disciplines) {
-
-        ArrayList<Period> fullCourse = new ArrayList<>();
-
-        ArrayList<Discipline> disciplinesWithTeacher = generateDisciplinesWithTeacher(disciplines, teachers);
-
-        for (int periodOrder = 1; periodOrder <= GlobalVariables.PERIOD_COUNT; periodOrder++) {
-            Period period = new Period(periodOrder);
-
-            ArrayList<Discipline> actualSemesterDisciplines = getDisciplinesOnSemester(disciplinesWithTeacher, periodOrder);
-            HashMap<String, Integer> usageDisciplines = generateListWithUsageCount(actualSemesterDisciplines);
-
-            for (int dayNumber = 0; dayNumber < WeekDate.getList().size(); dayNumber++) {
-                WeekDate weekDate = WeekDate.getList().get(dayNumber);
-                ArrayList<Discipline> dayDisciplines = new ArrayList<>();
-
-                while (dayDisciplines.size() < GlobalVariables.DISCIPLINES_PER_DAY) {
-                    Random random = new Random();
-                    int rnd = random.nextInt(actualSemesterDisciplines.size());
-                    Discipline randomDiscipline = actualSemesterDisciplines.get(rnd);
-
-                    usageDisciplines.put(randomDiscipline.getName(), usageDisciplines.getOrDefault(randomDiscipline.getName(), 0) + 1);
-                    int disciplineUsageCount = usageDisciplines.get(randomDiscipline.getName());
-
-                    if (Objects.equals(disciplineUsageCount, GlobalVariables.DISCIPLINES_PER_DAY)) {
-                        actualSemesterDisciplines.remove(rnd);
-                        usageDisciplines.remove(randomDiscipline.getName());
-                    }
-
-                    dayDisciplines.add(randomDiscipline);
-                }
-
-//                Schedule schedule = new Schedule(dayDisciplines, weekDate);
-//                period.addSchedule(schedule);
-            }
-
-            fullCourse.add(period);
-        }
-
-        return fullCourse;
     }
 
     private static ArrayList<Discipline> generateDisciplinesWithTeacher(ArrayList<Discipline> disciplines,
