@@ -9,6 +9,7 @@ import com.fasterxml.jackson.databind.ObjectWriter;
 
 import java.io.IOException;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static Common.Initializers.FullCourse.generateRandomFullCourseLine;
 import static Export.ExportFile.exportToHTMLFile;
@@ -20,6 +21,7 @@ public class Main {
 
         ArrayList<Individual> population = initialization();
         ArrayList<Individual> fitnessPopulation = fitness(population);
+        ArrayList<Individual> ordering = ordering(fitnessPopulation);
 
         //System.out.println(population);
 
@@ -63,7 +65,6 @@ public class Main {
 
                             System.out.println("HORÁRIO " + l);
                             System.out.println(firstItemToCompare + " => " + secondItemToCompare);
-                            System.out.println(individual.getCourse().get(firstItemToCompare).getWeekDate().getKey() + " => " + individual.getCourse().get(secondItemToCompare).getWeekDate().getKey());
                         }
                     }
                 }
@@ -73,5 +74,11 @@ public class Main {
         }
 
         return population;
+    }
+
+    public static ArrayList<Individual> ordering(ArrayList<Individual> population) {
+        List<Individual> list = population.stream().sorted((a1, a2) -> a1.getRate().compareTo(a2.getRate())).toList();
+
+        return new ArrayList<>(list);
     }
 }
