@@ -21,7 +21,7 @@ public class Main {
         ArrayList<Individual> population = initialization();
         ArrayList<Individual> fitnessPopulation = fitness(population);
 
-        System.out.println(population);
+        //System.out.println(population);
 
         //exportToHTMLFile(fitnessPopulation);
     }
@@ -29,82 +29,45 @@ public class Main {
     public static ArrayList<Individual> initialization() {
         ArrayList<Individual> population = new ArrayList<Individual>();
 
-        for (int i = 1; i < GlobalVariables.POPULATION_SIZE; i++) {
+        for (int i = 1; i <= GlobalVariables.POPULATION_SIZE; i++) {
             population.add(new Individual());
         }
 
         return population;
     }
 
-    public static ArrayList<Individual> fitness(ArrayList<Individual> population) throws JsonProcessingException {
+    public static ArrayList<Individual> fitness(ArrayList<Individual> population) {
         for (Individual individual : population) {
             Double rate = 0.0;
 
-            ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
-            String json = ow.writeValueAsString(individual);
+            int individualSize = individual.getCourse().size()/WeekDate.getList().size();
+            int weekDateListSize = WeekDate.getList().size();
 
-            System.out.println(json);
+            for (int k = 0; k < individualSize; k++) {
+                for (int i = 0; i < individualSize; i++) {
+                    for (int j = 0; j < (weekDateListSize - 1) - k; j++) {
+                        for (int l = 0; l < GlobalVariables.DISCIPLINES_PER_DAY; l++) {
+                            int firstItemToCompare = i + (k * weekDateListSize);
+                            int secondItemToCompare = i + (j * weekDateListSize) + (k * weekDateListSize) + weekDateListSize;
 
-            HashMap<WeekDate, HashSet<String>> dayWeekHashMap = WeekDate.getHashSet();
+                            Discipline firstItem = individual.getCourse().get(firstItemToCompare).getDisciplines().get(l);
+                            Discipline secondItem = individual.getCourse().get(secondItemToCompare).getDisciplines().get(l);
 
-            for (int i = 0; i < individual.getCourse().size(); i++) {
-                Integer weekdateSize = WeekDate.getList().size();
-                for(int j = 0; j < weekdateSize; j++) {
-                    for(int k = 0; k < GlobalVariables.DISCIPLINES_PER_DAY; k++) {
-                        String firstScheduleDisciplineName = individual.getCourse().get(j).getDisciplines().get(k).getName();
+                            if(firstItem.getTeacher().getId().equals(secondItem.getTeacher().getId())) {
+                                rate++;
+                                firstItem.setScheduleConflict(true);
+                                secondItem.setScheduleConflict(true);
 
-                        WeekDate firstDayWeek = individual.getCourse().get(j).getWeekDate();
+                                System.out.println("@@@ Conflito => " + firstItem.getTeacher().getName() + " e " + secondItem.getTeacher().getName());
+                            }
 
-                        int dayToCompare = j < 4 ? j + 5 : (j*5) + 5;
-                        String secondScheduleDisciplineName = individual.getCourse().get(dayToCompare).getDisciplines().get(k).getName();
-
-                        WeekDate secondDayWeek = individual.getCourse().get(dayToCompare).getWeekDate();
-                        if(firstScheduleDisciplineName.equals(secondScheduleDisciplineName)) {
-                            rate++;
+                            System.out.println("HORÁRIO " + l);
+                            System.out.println(firstItemToCompare + " => " + secondItemToCompare);
+                            System.out.println(individual.getCourse().get(firstItemToCompare).getWeekDate().getKey() + " => " + individual.getCourse().get(secondItemToCompare).getWeekDate().getKey());
                         }
                     }
                 }
             }
-
-//            for(Period period: individual.getCourse()) {
-//                for(Schedule schedule: period.getSchedules()) {
-//                    for(Discipline discipline: schedule.getDisciplines()) {
-//                        String teacherName = discipline.getTeacher().getName();
-//                        WeekDate weekDate = schedule.getWeekDate();
-//
-//                        HashSet<String> teachersInDay = dayWeekHashMap.get(schedule.getWeekDate());
-//
-//                        if (!teachersInDay.contains(teacherName)) {
-//                            teachersInDay.add(teacherName);
-//                            dayWeekHashMap.put(weekDate, teachersInDay);
-//                        } else {
-//                            discipline.setScheduleConflict(true);
-//                        }
-//                    }
-//                }
-//            }
-
-//            for (int disciplineSequence = 0; disciplineSequence < GlobalVariables.DISCIPLINES_PER_DAY; disciplineSequence++) {
-//                ArrayList<UUID> teachersInSameWeekDate = new ArrayList<>(TeacherInitializer.initializeTeachers().size());
-//                for (int dayNumber = 0; dayNumber < WeekDate.getList().size(); dayNumber++) {
-//                    for (int periodNumber = 0; periodNumber < GlobalVariables.PERIOD_COUNT; periodNumber++) {
-//                        Period period = individual.getCourse().get(periodNumber);
-//                        Schedule schedule = period.getSchedules().get(dayNumber);
-//                        Discipline discipline = schedule.getDisciplines().get(disciplineSequence);
-//                        UUID teacherUUID = discipline.getTeacher().getId();
-//
-//                        System.out.print(discipline.getTeacher().getName() + " | ");
-//
-//
-//                        Boolean teacherIdHasInArray = teachersInSameWeekDate.contains(teacherUUID);
-//                        if (!teacherIdHasInArray) {
-//                            teachersInSameWeekDate.add(teacherUUID);
-//                            break;
-//                        }
-//                        rate++;
-//                    }
-//                }
-//            }
 
             individual.setRate(rate);
         }
