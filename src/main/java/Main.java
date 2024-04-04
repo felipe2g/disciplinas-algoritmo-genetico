@@ -1,18 +1,11 @@
 import Common.GlobalVariables;
-import Common.Initializers.DisciplineInitializer;
-import Common.Initializers.TeacherInitializer;
 import Common.WeekDate;
-import Entities.*;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.ObjectWriter;
+import Entities.Discipline;
+import Entities.Individual;
+import Entities.Schedule;
 
 import java.io.IOException;
 import java.util.*;
-import java.util.stream.Collectors;
-
-import static Common.Initializers.FullCourse.generateRandomFullCourseLine;
-import static Export.ExportFile.exportToHTMLFile;
 
 
 public class Main {
@@ -22,6 +15,7 @@ public class Main {
         ArrayList<Individual> population = initialization();
         ArrayList<Individual> fitnessPopulation = fitness(population);
         ArrayList<Individual> ordering = ordering(fitnessPopulation);
+        ArrayList<Individual> crossover = crossover(ordering);
 
         //System.out.println(population);
 
@@ -32,7 +26,7 @@ public class Main {
         ArrayList<Individual> population = new ArrayList<Individual>();
 
         for (int i = 1; i <= GlobalVariables.POPULATION_SIZE; i++) {
-            population.add(new Individual());
+            population.add(new Individual().generate());
         }
 
         return population;
@@ -80,5 +74,58 @@ public class Main {
         List<Individual> list = population.stream().sorted((a1, a2) -> a1.getRate().compareTo(a2.getRate())).toList();
 
         return new ArrayList<>(list);
+    }
+
+    public static ArrayList<Individual> crossover (ArrayList<Individual> population) {
+        for (int i = 0; i < population.size(); i++) {
+            Random random = new Random();
+            int secondRandomItem = random.nextInt(population.size());
+
+            while (secondRandomItem == i) {
+                secondRandomItem = random.nextInt(population.size());
+            }
+
+            Individual actualIndividual = population.get(i);
+            Individual individualToCrossover = population.get(secondRandomItem);
+
+            int quantityCutPossibility = 25/WeekDate.getList().size();
+            //TODO: Ajustar 25 para número de dias da semana
+            int cutDotsCount = GlobalVariables.CUT_DOTS_COUNT == 0 ? random.nextInt(quantityCutPossibility) + 1 : GlobalVariables.CUT_DOTS_COUNT;
+
+            ArrayList<Integer> cutDots = new ArrayList<Integer>();
+
+            for (int j = 0; j < cutDotsCount; j++) {
+                int randomCutPoint = random.nextInt(cutDotsCount);
+
+                while (cutDots.contains(randomCutPoint)) {
+                    randomCutPoint = random.nextInt(cutDotsCount);
+                }
+
+                cutDots.add(randomCutPoint);
+            }
+
+            List<Integer> sortedCutDots = cutDots.stream().sorted().toList();
+            ArrayList<Integer> sortedCutDotsArray = new ArrayList<>(sortedCutDots);
+
+            Individual firstCrossoveredIndividual = new Individual();
+            Individual secondCrossoverIndividual = new Individual();
+
+            for (int j = 0; j < sortedCutDotsArray.size(); j++) {
+                int cutPoint = (sortedCutDotsArray.get(j) * WeekDate.getList().size());
+
+                for (int k = 0; k < WeekDate.getList().size(); k++) {
+                    Schedule actualSchedule = actualIndividual.getCourse().get(cutPoint + k);
+                    Schedule crossoverSchedule = individualToCrossover.getCourse().get(cutPoint + k);
+
+                    secondCrossoverIndividual.getCourse().add(actualSchedule);
+                    firstCrossoveredIndividual.getCourse().add(crossoverSchedule);
+                }
+            }
+
+            population.set(i, firstCrossoveredIndividual);
+            population.set(secondRandomItem, secondCrossoverIndividual);
+        }
+
+        return population;
     }
 }

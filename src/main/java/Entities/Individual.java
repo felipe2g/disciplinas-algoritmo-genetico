@@ -12,10 +12,6 @@ public class Individual {
     private Double rate = 0.0;
 
     public Individual() {
-        ArrayList<Teacher> teachers = TeacherInitializer.initializeTeachers();
-        ArrayList<Discipline> disciplines = DisciplineInitializer.initializeDisciplines();
-
-        this.course = FullCourse.generateRandomFullCourseLine(teachers, disciplines);
     }
 
     public Individual(ArrayList<Schedule> course, Double rate) {
@@ -37,6 +33,12 @@ public class Individual {
 
     public void setRate(Double rate) {
         this.rate = rate;
+    }
+
+    public Individual generate() {
+        this.course = FullCourse.generateRandomFullCourseLine();
+
+        return this;
     }
 
     @Override

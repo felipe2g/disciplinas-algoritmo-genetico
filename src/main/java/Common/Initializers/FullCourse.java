@@ -14,7 +14,10 @@ import java.util.stream.Collectors;
 
 public class FullCourse {
 
-    public static ArrayList<Schedule> generateRandomFullCourseLine(ArrayList<Teacher> teachers, ArrayList<Discipline> disciplines) {
+    public static ArrayList<Schedule> generateRandomFullCourseLine() {
+        ArrayList<Teacher> teachers = TeacherInitializer.initializeTeachers();
+        ArrayList<Discipline> disciplines = DisciplineInitializer.initializeDisciplines();
+
         ArrayList<Schedule> schedules = new ArrayList<>(disciplines.size());
 
         ArrayList<Discipline> disciplinesWithTeacher = generateDisciplinesWithTeacher(disciplines, teachers);
