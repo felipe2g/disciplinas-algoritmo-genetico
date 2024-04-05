@@ -2,6 +2,7 @@ package Export;
 
 import Common.WeekDate;
 import Entities.Individual;
+import Entities.Schedule;
 
 import java.io.FileWriter;
 import java.io.IOException;
@@ -26,22 +27,45 @@ public class ExportFile {
             Individual individual = population.get(individualIndex);
 //            ArrayList<Period> course = individual.getCourse();
 
-            gravarArq.printf("<h1>Indivíduo " + individualIndex + "</h1>");
-            gravarArq.printf("<h3>Nota " + individual.getRate() + "</h3>");
+            gravarArq.printf("<h1>Indivíduo " + individualIndex + 1 + "</h1>");
+            gravarArq.printf("<h3>Nota " + individual.getRate() + "</h3>%n");
+
+            for (int i = 0; i < individual.getCourse().size() / 5; i++) {
+//                gravarArq.printf("<h1>" + i + "</h1");
+//                gravarArq.printf("  <tr style=\"text-align: center\">%n <td style=\"border: 1px solid black; padding: 5px;\"> " + ((i % 5) + 1) + "º Período </td>");
 
 
             gravarArq.printf("<table style=\"border-collapse: collapse;\">%n");
-            gravarArq.printf("<thead>%n  <tr style=\"border: 1px solid black;\">%n");
-            gravarArq.printf("    <th style=\"border: 1px solid black; padding: 5px; background-color: #f2f2f2;\"> Período </th>%n");
+            gravarArq.printf("  <thead>%n");
+            gravarArq.printf("    <tr>%n");
+            gravarArq.printf("      <td align=\"center\" style=\"border: 1px solid black; padding: 5px; background-color: #f2f2f2;font-weight:bold;\" colspan="+WeekDate.getList().size()+">" + (i + 1) + "º Período</td>%n");
+            gravarArq.printf("    </tr>%n");
+            gravarArq.printf("    <tr style=\"border: 1px solid black;\">%n");
+//            gravarArq.printf("    <th style=\"border: 1px solid black; padding: 5px; background-color: #f2f2f2;\"> Período </th>%n");
             for (WeekDate weekDate : WeekDate.getList()) {
-                gravarArq.printf("    <th style=\"border: 1px solid black; padding: 5px; background-color: #f2f2f2;\">" + weekDate.getKey() + "</th>%n");
+                gravarArq.printf("      <th style=\"border: 1px solid black; padding: 5px; background-color: #f2f2f2;\">" + weekDate.getKey() + "</th>%n");
             }
-            gravarArq.printf("  </tr>%n</thead>%n");
+            gravarArq.printf("    </tr>%n");
+            gravarArq.printf("  </thead>%n");
 
-            gravarArq.printf("<tbody>%n");
+            gravarArq.printf("  <tbody>%n");
+
+            for (int j = 0; j < WeekDate.getList().size(); j++) {
+                gravarArq.printf("    <tr>");
+                for (int k = 0; k < WeekDate.getList().size(); k++) {
+                    gravarArq.printf("      <td>");
+                    gravarArq.printf("      </td>");
+                }
+                gravarArq.printf("    </tr>");
+            }
+
+            gravarArq.printf("  </tbody>%n");
+            gravarArq.printf("</table>%n");
+            }
+
 
 //            for (Period period : course) {
-//                gravarArq.printf("  <tr style=\"text-align: center\">%n <td style=\"border: 1px solid black; padding: 5px;\"> " + period.getOrder() + "º Período </td>");
+//
 //                for (Schedule schedule : period.getSchedules()) {
 //                    gravarArq.printf("    <td style=\"border: 1px solid black; padding: 5px;\">%n");
 //                    for (int i = 0; i < GlobalVariables.DISCIPLINES_PER_DAY; i++) {
@@ -59,7 +83,7 @@ public class ExportFile {
 //                gravarArq.printf("  </tr>%n");
 //            }
 
-            gravarArq.printf("</tbody></table>");
+
         }
 
         gravarArq.printf("</body>");

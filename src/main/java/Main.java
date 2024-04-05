@@ -5,8 +5,9 @@ import Entities.Individual;
 import Entities.Schedule;
 
 import java.io.IOException;
-import java.sql.SQLOutput;
 import java.util.*;
+
+import static Export.ExportFile.exportToHTMLFile;
 
 
 public class Main {
@@ -20,7 +21,7 @@ public class Main {
 
         //System.out.println(population);
 
-        //exportToHTMLFile(fitnessPopulation);
+        exportToHTMLFile(crossover);
     }
 
     public static ArrayList<Individual> initialization() {
