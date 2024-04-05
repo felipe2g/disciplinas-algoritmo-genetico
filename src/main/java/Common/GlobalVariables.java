@@ -1,6 +1,7 @@
 package Common;
 
 public class GlobalVariables {
+    // Need always be positive more than 2 and even
     public static Integer POPULATION_SIZE = 99;
     public static Integer PERIOD_COUNT = 5;
     public static Integer DISCIPLINES_PER_DAY = 2;

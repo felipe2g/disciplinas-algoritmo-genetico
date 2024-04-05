@@ -9,7 +9,7 @@ import java.util.ArrayList;
 public class Individual {
     private ArrayList<Schedule> course = new ArrayList<Schedule>();
 
-    private Double rate = 0.0;
+    private Double rate = null;
 
     public Individual() {
     }

@@ -5,6 +5,7 @@ import Entities.Individual;
 import Entities.Schedule;
 
 import java.io.IOException;
+import java.sql.SQLOutput;
 import java.util.*;
 
 
@@ -53,12 +54,7 @@ public class Main {
                                 rate++;
                                 firstItem.setScheduleConflict(true);
                                 secondItem.setScheduleConflict(true);
-
-                                System.out.println("@@@ Conflito => " + firstItem.getTeacher().getName() + " e " + secondItem.getTeacher().getName());
                             }
-
-                            System.out.println("HORÁRIO " + l);
-                            System.out.println(firstItemToCompare + " => " + secondItemToCompare);
                         }
                     }
                 }
@@ -77,55 +73,54 @@ public class Main {
     }
 
     public static ArrayList<Individual> crossover (ArrayList<Individual> population) {
-        for (int i = 0; i < population.size(); i++) {
+        ArrayList<Individual> newPopulation = new ArrayList<>();
+        while(!population.isEmpty()) {
+            int populationMaxIndex = population.size() - 1;
+
+            if(population.size() == 1) {
+                newPopulation.add(population.get(0));
+                population.remove(0);
+                break;
+            }
             Random random = new Random();
-            int secondRandomItem = random.nextInt(population.size());
+            int i = random.nextInt(populationMaxIndex);
+            Individual actualIndividual = population.get(i);
+            actualIndividual.setRate(0.0);
+
+            int secondRandomItem = random.nextInt(populationMaxIndex);
+            Individual individualToCrossover = population.get(secondRandomItem);
+            individualToCrossover.setRate(0.0);
 
             while (secondRandomItem == i) {
-                secondRandomItem = random.nextInt(population.size());
+                secondRandomItem = random.nextInt(populationMaxIndex);
+                individualToCrossover = population.get(secondRandomItem);
             }
 
-            Individual actualIndividual = population.get(i);
-            Individual individualToCrossover = population.get(secondRandomItem);
+            int quantityCutPossibility = 25 / WeekDate.getList().size();
 
-            int quantityCutPossibility = 25/WeekDate.getList().size();
-            //TODO: Ajustar 25 para número de dias da semana
-            int cutDotsCount = GlobalVariables.CUT_DOTS_COUNT == 0 ? random.nextInt(quantityCutPossibility) + 1 : GlobalVariables.CUT_DOTS_COUNT;
+            for (int j = 0; j < quantityCutPossibility; j++) {
+                boolean crossover = random.nextBoolean();
 
-            ArrayList<Integer> cutDots = new ArrayList<Integer>();
+                if(crossover) {
+                    for (int k = 0; k < WeekDate.getList().size(); k++) {
+                        int positionToGet = (j * WeekDate.getList().size()) + k;
+                        Schedule actualSchedule = actualIndividual.getCourse().get(positionToGet);
+                        Schedule crossoverSchedule = individualToCrossover.getCourse().get(positionToGet);
 
-            for (int j = 0; j < cutDotsCount; j++) {
-                int randomCutPoint = random.nextInt(cutDotsCount);
-
-                while (cutDots.contains(randomCutPoint)) {
-                    randomCutPoint = random.nextInt(cutDotsCount);
-                }
-
-                cutDots.add(randomCutPoint);
-            }
-
-            List<Integer> sortedCutDots = cutDots.stream().sorted().toList();
-            ArrayList<Integer> sortedCutDotsArray = new ArrayList<>(sortedCutDots);
-
-            Individual firstCrossoveredIndividual = new Individual();
-            Individual secondCrossoverIndividual = new Individual();
-
-            for (int j = 0; j < sortedCutDotsArray.size(); j++) {
-                int cutPoint = (sortedCutDotsArray.get(j) * WeekDate.getList().size());
-
-                for (int k = 0; k < WeekDate.getList().size(); k++) {
-                    Schedule actualSchedule = actualIndividual.getCourse().get(cutPoint + k);
-                    Schedule crossoverSchedule = individualToCrossover.getCourse().get(cutPoint + k);
-
-                    secondCrossoverIndividual.getCourse().add(actualSchedule);
-                    firstCrossoveredIndividual.getCourse().add(crossoverSchedule);
+                        actualIndividual.getCourse().set(positionToGet, crossoverSchedule);
+                        individualToCrossover.getCourse().set(positionToGet, actualSchedule);
+                    }
                 }
             }
 
-            population.set(i, firstCrossoveredIndividual);
-            population.set(secondRandomItem, secondCrossoverIndividual);
+            actualIndividual.getCourse().forEach(schedule -> schedule.getDisciplines().forEach(discipline -> discipline.setScheduleConflict(false)));
+            newPopulation.add(actualIndividual);
+            individualToCrossover.getCourse().forEach(schedule -> schedule.getDisciplines().forEach(discipline -> discipline.setScheduleConflict(false)));
+            newPopulation.add(individualToCrossover);
+            population.remove(i);
+            population.remove(secondRandomItem);
         }
 
-        return population;
+        return newPopulation;
     }
 }
