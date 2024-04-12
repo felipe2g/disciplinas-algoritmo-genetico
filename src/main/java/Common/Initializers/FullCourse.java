@@ -33,17 +33,18 @@ public class FullCourse {
                 while (dayDisciplines.size() < GlobalVariables.DISCIPLINES_PER_DAY) {
                     Random random = new Random();
                     int rnd = random.nextInt(actualSemesterDisciplines.size());
-                    Discipline randomDiscipline = actualSemesterDisciplines.get(rnd);
+                    Discipline discipline = actualSemesterDisciplines.get(rnd);
+                    Discipline uniqueDiscipline = new Discipline(discipline.getTeacher(), discipline.getName(), discipline.getSemester());
 
-                    usageDisciplines.put(randomDiscipline.getName(), usageDisciplines.getOrDefault(randomDiscipline.getName(), 0) + 1);
-                    int disciplineUsageCount = usageDisciplines.get(randomDiscipline.getName());
+                    usageDisciplines.put(uniqueDiscipline.getName(), usageDisciplines.getOrDefault(uniqueDiscipline.getName(), 0) + 1);
+                    int disciplineUsageCount = usageDisciplines.get(uniqueDiscipline.getName());
 
                     if (Objects.equals(disciplineUsageCount, GlobalVariables.DISCIPLINES_PER_DAY)) {
                         actualSemesterDisciplines.remove(rnd);
-                        usageDisciplines.remove(randomDiscipline.getName());
+                        usageDisciplines.remove(uniqueDiscipline.getName());
                     }
 
-                    dayDisciplines.add(randomDiscipline);
+                    dayDisciplines.add(uniqueDiscipline);
                 }
 
                 Schedule schedule = new Schedule(dayDisciplines, weekDate, periodOrder);

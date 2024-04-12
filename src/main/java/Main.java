@@ -7,6 +7,7 @@ import Entities.Schedule;
 import java.io.IOException;
 import java.util.*;
 
+import static Export.ExportFile.exportJSONToFile;
 import static Export.ExportFile.exportToHTMLFile;
 
 
@@ -18,10 +19,12 @@ public class Main {
         ArrayList<Individual> fitnessPopulation = fitness(population);
         ArrayList<Individual> ordering = ordering(fitnessPopulation);
         ArrayList<Individual> crossover = crossover(ordering);
+        ArrayList<Individual> fitnessCrossover = fitness(crossover);
 
-        //System.out.println(population);
+        ArrayList<Individual> mutation = ordering(mutation(fitnessCrossover));
 
-        exportToHTMLFile(crossover);
+        exportToHTMLFile(mutation);
+        exportJSONToFile(mutation);
     }
 
     public static ArrayList<Individual> initialization() {
@@ -37,24 +40,30 @@ public class Main {
     public static ArrayList<Individual> fitness(ArrayList<Individual> population) {
         for (Individual individual : population) {
             Double rate = 0.0;
-
-            int individualSize = individual.getCourse().size()/WeekDate.getList().size();
             int weekDateListSize = WeekDate.getList().size();
 
-            for (int k = 0; k < individualSize; k++) {
-                for (int i = 0; i < individualSize; i++) {
-                    for (int j = 0; j < (weekDateListSize - 1) - k; j++) {
-                        for (int l = 0; l < GlobalVariables.DISCIPLINES_PER_DAY; l++) {
-                            int firstItemToCompare = i + (k * weekDateListSize);
-                            int secondItemToCompare = i + (j * weekDateListSize) + (k * weekDateListSize) + weekDateListSize;
+            for (int k = 0; k < GlobalVariables.DISCIPLINES_PER_DAY; k++) {
+                for (int i = 0; i < weekDateListSize; i++) {
+                    Set<String> teachersName = new HashSet<>();
+                    Set<String> duplicatedTeachersName = new HashSet<>();
+                    for (int j = 0; j < weekDateListSize; j++) {
+                        int indexToAdd = (j * 5) + i;
 
-                            Discipline firstItem = individual.getCourse().get(firstItemToCompare).getDisciplines().get(l);
-                            Discipline secondItem = individual.getCourse().get(secondItemToCompare).getDisciplines().get(l);
+                        if(!teachersName.add(individual.getCourse().get(indexToAdd).getDisciplines().get(k).getTeacher().getName())) {
+                            duplicatedTeachersName.add(individual.getCourse().get(indexToAdd).getDisciplines().get(k).getTeacher().getName());
+                        }
+                    }
 
-                            if(firstItem.getTeacher().getId().equals(secondItem.getTeacher().getId())) {
+                    if(!duplicatedTeachersName.isEmpty()) {
+                        for (int l = 0; l < weekDateListSize; l++) {
+                            int indexToAdd = (l * 5) + i;
+
+                            Discipline discipline = individual.getCourse().get(indexToAdd).getDisciplines().get(k);
+                            String teacherName = discipline.getTeacher().getName();
+
+                            if(duplicatedTeachersName.contains(teacherName)) {
+                                discipline.setScheduleConflict(true);
                                 rate++;
-                                firstItem.setScheduleConflict(true);
-                                secondItem.setScheduleConflict(true);
                             }
                         }
                     }
@@ -73,12 +82,12 @@ public class Main {
         return new ArrayList<>(list);
     }
 
-    public static ArrayList<Individual> crossover (ArrayList<Individual> population) {
+    public static ArrayList<Individual> crossover(ArrayList<Individual> population) {
         ArrayList<Individual> newPopulation = new ArrayList<>();
-        while(!population.isEmpty()) {
+        while (!population.isEmpty()) {
             int populationMaxIndex = population.size() - 1;
 
-            if(population.size() == 1) {
+            if (population.size() == 1) {
                 newPopulation.add(population.get(0));
                 population.remove(0);
                 break;
@@ -102,7 +111,7 @@ public class Main {
             for (int j = 0; j < quantityCutPossibility; j++) {
                 boolean crossover = random.nextBoolean();
 
-                if(crossover) {
+                if (crossover) {
                     for (int k = 0; k < WeekDate.getList().size(); k++) {
                         int positionToGet = (j * WeekDate.getList().size()) + k;
                         Schedule actualSchedule = actualIndividual.getCourse().get(positionToGet);
@@ -123,5 +132,33 @@ public class Main {
         }
 
         return newPopulation;
+    }
+
+    public static ArrayList<Individual> mutation(ArrayList<Individual> population) {
+        int itemsPerWeek = 25 / WeekDate.getList().size();
+
+        for (Individual individual : population) {
+            for (int j = 0; j < itemsPerWeek; j++) {
+                Random random = new Random();
+                double chance = random.nextDouble();
+
+                if(chance < GlobalVariables.MUTATION_PROBABILITY) {
+                    int firstRandomItem = random.nextInt(itemsPerWeek) + (j * itemsPerWeek);
+                    int secondRandomItem = random.nextInt(itemsPerWeek) + (j * itemsPerWeek);
+
+                    while (secondRandomItem == firstRandomItem) {
+                        secondRandomItem = random.nextInt(itemsPerWeek) + (j * itemsPerWeek);
+                    }
+
+                    Schedule firstSchedule = individual.getCourse().get(firstRandomItem);
+                    Schedule secondSchedule = individual.getCourse().get(secondRandomItem);
+
+                    individual.getCourse().set(secondRandomItem, firstSchedule);
+                    individual.getCourse().set(firstRandomItem, secondSchedule);
+                }
+            }
+        }
+
+        return population;
     }
 }

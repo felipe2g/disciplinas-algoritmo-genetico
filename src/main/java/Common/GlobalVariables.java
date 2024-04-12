@@ -8,4 +8,5 @@ public class GlobalVariables {
     public static Boolean HAS_SAME_DISCIPLINE_IN_DAY = false;
     public static Long START_TIME;
     public static int CUT_DOTS_COUNT = 0;
+    public static double MUTATION_PROBABILITY = 0.05;
 }
