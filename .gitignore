@@ -30,3 +30,8 @@ bin/
 
 ### Intellij
 .idea
+
+### Exports
+horarios.html
+target
+export.json
