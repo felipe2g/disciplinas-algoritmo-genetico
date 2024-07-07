@@ -16,15 +16,31 @@ public class Main {
         GlobalVariables.START_TIME = System.nanoTime();
 
         ArrayList<Individual> population = initialization();
-        ArrayList<Individual> fitnessPopulation = fitness(population);
-        ArrayList<Individual> ordering = ordering(fitnessPopulation);
-        ArrayList<Individual> crossover = crossover(ordering);
-        ArrayList<Individual> fitnessCrossover = fitness(crossover);
+        ArrayList<Individual> fitness;
+        ArrayList<Individual> ordering;
+        ArrayList<Individual> crossover;
 
-        ArrayList<Individual> mutation = ordering(mutation(fitnessCrossover));
+        do {
+            fitness = fitness(population);
 
-        exportToHTMLFile(mutation);
-        exportJSONToFile(mutation);
+            if(population.get(0).getRate() != null && population.get(0).getRate() == 0) {
+                break;
+            }
+            System.out.println("Menor rate => " + population.get(0).getRate());
+            ordering = ordering(fitness);
+            crossover = crossover(ordering);
+
+
+            population = mutation(crossover);
+        } while(population.get(0).getRate() == null || population.get(0).getRate() != 0);
+
+        long endTime = System.nanoTime();
+        long duration = (endTime - GlobalVariables.START_TIME);  // Tempo em nanossegundos
+        double seconds = duration / 1_000_000_000.0;  // Tempo em segundos (double)
+        System.out.println("Tempo de execução: " + seconds + " segundos");
+
+        exportToHTMLFile(population);
+        exportJSONToFile(population);
     }
 
     public static ArrayList<Individual> initialization() {
@@ -95,11 +111,11 @@ public class Main {
             Random random = new Random();
             int i = random.nextInt(populationMaxIndex);
             Individual actualIndividual = population.get(i);
-            actualIndividual.setRate(0.0);
+            actualIndividual.setRate(null);
 
             int secondRandomItem = random.nextInt(populationMaxIndex);
             Individual individualToCrossover = population.get(secondRandomItem);
-            individualToCrossover.setRate(0.0);
+            individualToCrossover.setRate(null);
 
             while (secondRandomItem == i) {
                 secondRandomItem = random.nextInt(populationMaxIndex);
