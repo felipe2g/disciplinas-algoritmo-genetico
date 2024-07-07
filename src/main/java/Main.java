@@ -6,6 +6,9 @@ import Entities.Schedule;
 
 import java.io.IOException;
 import java.util.*;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 import static Export.ExportFile.exportJSONToFile;
 import static Export.ExportFile.exportToHTMLFile;
@@ -93,7 +96,7 @@ public class Main {
     }
 
     public static ArrayList<Individual> ordering(ArrayList<Individual> population) {
-        List<Individual> list = population.stream().sorted((a1, a2) -> a1.getRate().compareTo(a2.getRate())).toList();
+        List<Individual> list = population.parallelStream().sorted((a1, a2) -> a1.getRate().compareTo(a2.getRate())).toList();
 
         return new ArrayList<>(list);
     }
@@ -151,28 +154,41 @@ public class Main {
     }
 
     public static ArrayList<Individual> mutation(ArrayList<Individual> population) {
+        int numThreads = Runtime.getRuntime().availableProcessors(); // Número de processadores disponíveis
+        ExecutorService executor = Executors.newFixedThreadPool(numThreads);
+
         int itemsPerWeek = 25 / WeekDate.getList().size();
 
         for (Individual individual : population) {
             for (int j = 0; j < itemsPerWeek; j++) {
-                Random random = new Random();
-                double chance = random.nextDouble();
+                int finalJ = j;
+                executor.submit(() -> {
+                    Random random = new Random();
+                    double chance = random.nextDouble();
 
-                if(chance < GlobalVariables.MUTATION_PROBABILITY) {
-                    int firstRandomItem = random.nextInt(itemsPerWeek) + (j * itemsPerWeek);
-                    int secondRandomItem = random.nextInt(itemsPerWeek) + (j * itemsPerWeek);
+                    if(chance < GlobalVariables.MUTATION_PROBABILITY) {
+                        int firstRandomItem = random.nextInt(itemsPerWeek) + (finalJ * itemsPerWeek);
+                        int secondRandomItem = random.nextInt(itemsPerWeek) + (finalJ * itemsPerWeek);
 
-                    while (secondRandomItem == firstRandomItem) {
-                        secondRandomItem = random.nextInt(itemsPerWeek) + (j * itemsPerWeek);
+                        while (secondRandomItem == firstRandomItem) {
+                            secondRandomItem = random.nextInt(itemsPerWeek) + (finalJ * itemsPerWeek);
+                        }
+
+                        Schedule firstSchedule = individual.getCourse().get(firstRandomItem);
+                        Schedule secondSchedule = individual.getCourse().get(secondRandomItem);
+
+                        individual.getCourse().set(secondRandomItem, firstSchedule);
+                        individual.getCourse().set(firstRandomItem, secondSchedule);
                     }
-
-                    Schedule firstSchedule = individual.getCourse().get(firstRandomItem);
-                    Schedule secondSchedule = individual.getCourse().get(secondRandomItem);
-
-                    individual.getCourse().set(secondRandomItem, firstSchedule);
-                    individual.getCourse().set(firstRandomItem, secondSchedule);
-                }
+                });
             }
+        }
+
+        executor.shutdown();
+        try {
+            executor.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
+        } catch (InterruptedException e) {
+            System.err.println("Error waiting for executor to terminate: " + e.getMessage());
         }
 
         return population;

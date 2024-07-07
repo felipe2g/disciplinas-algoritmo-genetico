@@ -9,4 +9,5 @@ public class GlobalVariables {
     public static Long START_TIME;
     public static int CUT_DOTS_COUNT = 0;
     public static double MUTATION_PROBABILITY = 0.05;
+    public static int THREAD_COUNT = 4;
 }
