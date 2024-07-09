@@ -12,38 +12,85 @@ import java.util.concurrent.TimeUnit;
 
 import static Export.ExportFile.exportJSONToFile;
 import static Export.ExportFile.exportToHTMLFile;
+import static Export.ExportReport.addTimeStatisticLineToFile;
 
 
 public class Main {
     public static void main(String[] args) throws IOException {
         GlobalVariables.START_TIME = System.nanoTime();
 
+        if(GlobalVariables.MEASURE_STATISTICS) {
+            measureStatistics();
+            System.out.println("Measure statistics success!");
+            return;
+        }
+
         ArrayList<Individual> population = initialization();
-        ArrayList<Individual> fitness;
-        ArrayList<Individual> ordering;
-        ArrayList<Individual> crossover;
 
         do {
-            fitness = fitness(population);
+            population = fitness(population);
 
-            if(population.get(0).getRate() != null && population.get(0).getRate() == 0) {
+            if(population.get(0).getRate() == 0) {
                 break;
             }
-            System.out.println("Menor rate => " + population.get(0).getRate());
-            ordering = ordering(fitness);
-            crossover = crossover(ordering);
 
+            System.out.println("rate => " + population.get(0).getRate());
 
-            population = mutation(crossover);
+            population = ordering(population);
+            population = crossover(population);
+            population = mutation(population);
         } while(population.get(0).getRate() == null || population.get(0).getRate() != 0);
 
         long endTime = System.nanoTime();
-        long duration = (endTime - GlobalVariables.START_TIME);  // Tempo em nanossegundos
-        double seconds = duration / 1_000_000_000.0;  // Tempo em segundos (double)
+        long duration = (endTime - GlobalVariables.START_TIME);
+        double seconds = duration / 1_000_000_000.0;
         System.out.println("Tempo de execução: " + seconds + " segundos");
 
         exportToHTMLFile(population);
         exportJSONToFile(population);
+    }
+
+    public static void measureStatistics() throws IOException {
+        for(double mutationProbability = GlobalVariables.MUTATION_PROBABILITY;
+            mutationProbability < GlobalVariables.MAX_MEASURE_MUTATION;
+            mutationProbability += GlobalVariables.MEASURE_MUTATION_INCREMENT) {
+            GlobalVariables.MUTATION_PROBABILITY = mutationProbability;
+            System.out.println("Mutation Probability: " + GlobalVariables.MUTATION_PROBABILITY);
+            for(int i = 0; i < GlobalVariables.TOTAL_MEASUREMENTS_COUNT_FOR_PROBABILITY; i++) {
+                ArrayList<Individual> population = initialization();
+                ArrayList<Individual> fitness;
+                ArrayList<Individual> ordering;
+                ArrayList<Individual> crossover;
+
+                do {
+                    fitness = fitness(population);
+
+                    if(population.get(0).getRate() != null && population.get(0).getRate() == 0) {
+                        break;
+                    }
+                    ordering = ordering(fitness);
+                    crossover = crossover(ordering);
+
+
+                    population = mutation(crossover);
+                } while(population.get(0).getRate() == null || population.get(0).getRate() != 0);
+
+                Date date = new Date();
+
+                addTimeStatisticLineToFile(date.toString() + ";" +
+                        GlobalVariables.MUTATION_PROBABILITY + ";" +
+                        getElapsedTime(System.nanoTime()));
+                System.out.println(date.toString() + ";" + GlobalVariables.MUTATION_PROBABILITY + ";" + getElapsedTime(System.nanoTime()));
+                System.out.println("Tempo de execução: " + getElapsedTime(System.nanoTime()) + " segundos");
+                GlobalVariables.START_TIME = System.nanoTime();
+            }
+        }
+
+    }
+
+    public static double getElapsedTime(long endTime) {
+        long duration = (endTime - GlobalVariables.START_TIME);
+        return duration / 1_000_000_000.0;
     }
 
     public static ArrayList<Individual> initialization() {
@@ -56,40 +103,53 @@ public class Main {
         return population;
     }
 
-    public static ArrayList<Individual> fitness(ArrayList<Individual> population) {
-        for (Individual individual : population) {
-            Double rate = 0.0;
-            int weekDateListSize = WeekDate.getList().size();
+    public static void calculateFitness(Individual individual) {
+        Double rate = 0.0;
+        int weekDateListSize = WeekDate.getList().size();
 
-            for (int k = 0; k < GlobalVariables.DISCIPLINES_PER_DAY; k++) {
-                for (int i = 0; i < weekDateListSize; i++) {
-                    Set<String> teachersName = new HashSet<>();
-                    Set<String> duplicatedTeachersName = new HashSet<>();
-                    for (int j = 0; j < weekDateListSize; j++) {
-                        int indexToAdd = (j * 5) + i;
+        for (int k = 0; k < GlobalVariables.DISCIPLINES_PER_DAY; k++) {
+            for (int i = 0; i < weekDateListSize; i++) {
+                Set<String> teachersName = new HashSet<>();
+                Set<String> duplicatedTeachersName = new HashSet<>();
+                for (int j = 0; j < weekDateListSize; j++) {
+                    int indexToAdd = (j * 5) + i;
 
-                        if(!teachersName.add(individual.getCourse().get(indexToAdd).getDisciplines().get(k).getTeacher().getName())) {
-                            duplicatedTeachersName.add(individual.getCourse().get(indexToAdd).getDisciplines().get(k).getTeacher().getName());
-                        }
+                    if(!teachersName.add(individual.getCourse().get(indexToAdd).getDisciplines().get(k).getTeacher().getName())) {
+                        duplicatedTeachersName.add(individual.getCourse().get(indexToAdd).getDisciplines().get(k).getTeacher().getName());
                     }
+                }
 
-                    if(!duplicatedTeachersName.isEmpty()) {
-                        for (int l = 0; l < weekDateListSize; l++) {
-                            int indexToAdd = (l * 5) + i;
+                if(!duplicatedTeachersName.isEmpty()) {
+                    for (int l = 0; l < weekDateListSize; l++) {
+                        int indexToAdd = (l * 5) + i;
 
-                            Discipline discipline = individual.getCourse().get(indexToAdd).getDisciplines().get(k);
-                            String teacherName = discipline.getTeacher().getName();
+                        Discipline discipline = individual.getCourse().get(indexToAdd).getDisciplines().get(k);
+                        String teacherName = discipline.getTeacher().getName();
 
-                            if(duplicatedTeachersName.contains(teacherName)) {
-                                discipline.setScheduleConflict(true);
-                                rate++;
-                            }
+                        if(duplicatedTeachersName.contains(teacherName)) {
+                            discipline.setScheduleConflict(true);
+                            rate++;
                         }
                     }
                 }
             }
+        }
 
-            individual.setRate(rate);
+        individual.setRate(rate);
+    }
+
+    public static ArrayList<Individual> fitness(ArrayList<Individual> population) {
+        ExecutorService executor = Executors.newFixedThreadPool(GlobalVariables.THREAD_COUNT);
+
+        for (Individual individual : population) {
+            executor.submit(() -> calculateFitness(individual));
+        }
+
+        executor.shutdown();
+        try {
+            executor.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
         }
 
         return population;
@@ -154,41 +214,28 @@ public class Main {
     }
 
     public static ArrayList<Individual> mutation(ArrayList<Individual> population) {
-        int numThreads = Runtime.getRuntime().availableProcessors(); // Número de processadores disponíveis
-        ExecutorService executor = Executors.newFixedThreadPool(numThreads);
-
         int itemsPerWeek = 25 / WeekDate.getList().size();
 
         for (Individual individual : population) {
             for (int j = 0; j < itemsPerWeek; j++) {
-                int finalJ = j;
-                executor.submit(() -> {
-                    Random random = new Random();
-                    double chance = random.nextDouble();
+                Random random = new Random();
+                double chance = random.nextDouble();
 
-                    if(chance < GlobalVariables.MUTATION_PROBABILITY) {
-                        int firstRandomItem = random.nextInt(itemsPerWeek) + (finalJ * itemsPerWeek);
-                        int secondRandomItem = random.nextInt(itemsPerWeek) + (finalJ * itemsPerWeek);
+                if(chance < GlobalVariables.MUTATION_PROBABILITY) {
+                    int firstRandomItem = random.nextInt(itemsPerWeek) + (j * itemsPerWeek);
+                    int secondRandomItem = random.nextInt(itemsPerWeek) + (j * itemsPerWeek);
 
-                        while (secondRandomItem == firstRandomItem) {
-                            secondRandomItem = random.nextInt(itemsPerWeek) + (finalJ * itemsPerWeek);
-                        }
-
-                        Schedule firstSchedule = individual.getCourse().get(firstRandomItem);
-                        Schedule secondSchedule = individual.getCourse().get(secondRandomItem);
-
-                        individual.getCourse().set(secondRandomItem, firstSchedule);
-                        individual.getCourse().set(firstRandomItem, secondSchedule);
+                    while (secondRandomItem == firstRandomItem) {
+                        secondRandomItem = random.nextInt(itemsPerWeek) + (j * itemsPerWeek);
                     }
-                });
-            }
-        }
 
-        executor.shutdown();
-        try {
-            executor.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
-        } catch (InterruptedException e) {
-            System.err.println("Error waiting for executor to terminate: " + e.getMessage());
+                    Schedule firstSchedule = individual.getCourse().get(firstRandomItem);
+                    Schedule secondSchedule = individual.getCourse().get(secondRandomItem);
+
+                    individual.getCourse().set(secondRandomItem, firstSchedule);
+                    individual.getCourse().set(firstRandomItem, secondSchedule);
+                }
+            }
         }
 
         return population;

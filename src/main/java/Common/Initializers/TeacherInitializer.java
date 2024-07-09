@@ -17,9 +17,9 @@ public class TeacherInitializer {
         Teacher teacher7 = new Teacher("Ricardo Boaventura");
         Teacher teacher8 = new Teacher("Rodrigo Cavanha");
         Teacher teacher9 = new Teacher("Bruno Queiroz");
-        Teacher teacher10 = new Teacher("Travis Scott");
-        Teacher teacher11 = new Teacher("Dave Mustaine");
-        Teacher teacher12 = new Teacher("Chuck Schuldiner");
+        Teacher teacher10 = new Teacher("Samira");
+        Teacher teacher11 = new Teacher("Juliana Silvestre");
+        Teacher teacher12 = new Teacher("Cibele");
 
         ArrayList<Teacher> teachers = new ArrayList<>();
         teachers.add(teacher1);

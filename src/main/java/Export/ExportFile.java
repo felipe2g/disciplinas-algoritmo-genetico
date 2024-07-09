@@ -57,7 +57,7 @@ public class ExportFile {
 
                 gravarArq.printf("    <tr>%n");
                     for (int j = 0; j < cellsPerWeek; j++) {
-                        int positionToGet = ((i * 5) + j);
+                        int positionToGet = ((i * WeekDate.getList().size()) + j);
                         gravarArq.printf("      <td style=\"text-align: center; border: 1px solid black; padding: 5px;\">");
                         for (int l = 0; l < GlobalVariables.DISCIPLINES_PER_DAY; l++) {
                             Discipline discipline = individual.getCourse().get(positionToGet).getDisciplines().get(l);
