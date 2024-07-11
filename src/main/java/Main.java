@@ -5,6 +5,8 @@ import Entities.Individual;
 import Entities.Schedule;
 
 import java.io.IOException;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -36,9 +38,7 @@ public class Main {
 
             System.out.println("rate => " + population.get(0).getRate());
 
-            population = ordering(population);
-            population = crossover(population);
-            population = mutation(population);
+            population = mutation(crossover(ordering(population)));
         } while(population.get(0).getRate() == null || population.get(0).getRate() != 0);
 
         long endTime = System.nanoTime();
@@ -51,6 +51,10 @@ public class Main {
     }
 
     public static void measureStatistics() throws IOException {
+        LocalDate actualDate = LocalDate.now();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+        String date = actualDate.format(formatter);
+
         for(double mutationProbability = GlobalVariables.MUTATION_PROBABILITY;
             mutationProbability < GlobalVariables.MAX_MEASURE_MUTATION;
             mutationProbability += GlobalVariables.MEASURE_MUTATION_INCREMENT) {
@@ -59,28 +63,40 @@ public class Main {
             for(int i = 0; i < GlobalVariables.TOTAL_MEASUREMENTS_COUNT_FOR_PROBABILITY; i++) {
                 ArrayList<Individual> population = initialization();
                 ArrayList<Individual> fitness;
-                ArrayList<Individual> ordering;
-                ArrayList<Individual> crossover;
+                int maxProcessingCounts = GlobalVariables.MAX_PROCESSING_COUNTS;
+                int loopCounts = 0;
 
                 do {
-                    fitness = fitness(population);
-
-                    if(population.get(0).getRate() != null && population.get(0).getRate() == 0) {
+                    if(loopCounts >= maxProcessingCounts) {
                         break;
                     }
-                    ordering = ordering(fitness);
-                    crossover = crossover(ordering);
 
+                    fitness = fitness(population);
 
-                    population = mutation(crossover);
-                } while(population.get(0).getRate() == null || population.get(0).getRate() != 0);
+                    if(population.get(0).getRate() == 0) {
+                        break;
+                    }
 
-                Date date = new Date();
+                    population = mutation(crossover(ordering(fitness)));
+                    loopCounts++;
+                } while(population.get(0).getRate() == null || population.get(0).getRate() != 0|| loopCounts < maxProcessingCounts);
 
-                addTimeStatisticLineToFile(date.toString() + ";" +
+                String status = (loopCounts >= maxProcessingCounts) ? "FAIL" : "SUCCESS";
+                String logMessage = date + ";" +
                         GlobalVariables.MUTATION_PROBABILITY + ";" +
-                        getElapsedTime(System.nanoTime()));
-                System.out.println(date.toString() + ";" + GlobalVariables.MUTATION_PROBABILITY + ";" + getElapsedTime(System.nanoTime()));
+                        GlobalVariables.PERIOD_COUNT + ";" +
+                        GlobalVariables.DISCIPLINES_PER_DAY + ";" +
+                        GlobalVariables.THREAD_COUNT + ";" +
+                        GlobalVariables.TOTAL_MEASUREMENTS_COUNT_FOR_PROBABILITY + ";" +
+                        GlobalVariables.MEASURE_MUTATION_INCREMENT + ";" +
+                        GlobalVariables.MAX_MEASURE_MUTATION + ";" +
+                        GlobalVariables.MAX_PROCESSING_COUNTS + ";" +
+                        getElapsedTime(System.nanoTime()) + ";" +
+                        status + ";" +
+                        loopCounts;
+
+                        addTimeStatisticLineToFile(logMessage);
+                System.out.println(logMessage);
                 System.out.println("Tempo de execução: " + getElapsedTime(System.nanoTime()) + " segundos");
                 GlobalVariables.START_TIME = System.nanoTime();
             }
